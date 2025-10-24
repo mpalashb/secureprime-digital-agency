@@ -9,9 +9,21 @@ import { Send } from "lucide-react";
 import { z } from "zod";
 
 const contactSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
-  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
-  message: z.string().trim().min(1, "Message is required").max(1000, "Message must be less than 1000 characters"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters"),
+  email: z
+    .string()
+    .trim()
+    .email("Invalid email address")
+    .max(255, "Email must be less than 255 characters"),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Message is required")
+    .max(1000, "Message must be less than 1000 characters"),
 });
 
 const Contact = () => {
@@ -25,9 +37,9 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const result = contactSchema.safeParse(formData);
-    
+
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -40,16 +52,19 @@ const Contact = () => {
     }
 
     setErrors({});
-    
+
     toast({
       title: "Message Sent!",
-      description: "Thank you for reaching out. We'll get back to you within 24 hours.",
+      description:
+        "Thank you for reaching out. We'll get back to you within 24 hours.",
     });
 
     setFormData({ name: "", email: "", message: "" });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -58,7 +73,7 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-24 bg-muted/30">
+    <section id="contact" className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
@@ -74,7 +89,9 @@ const Contact = () => {
             <CardContent className="pt-8 pb-6 px-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <Label htmlFor="name" className="text-card-foreground">Name</Label>
+                  <Label htmlFor="name" className="text-card-foreground">
+                    Name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="name"
                     name="name"
@@ -85,12 +102,16 @@ const Contact = () => {
                     placeholder="Your full name"
                   />
                   {errors.name && (
-                    <p className="text-sm text-destructive mt-1">{errors.name}</p>
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.name}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="email" className="text-card-foreground">Email</Label>
+                  <Label htmlFor="email" className="text-card-foreground">
+                    Email <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -101,12 +122,16 @@ const Contact = () => {
                     placeholder="your.email@example.com"
                   />
                   {errors.email && (
-                    <p className="text-sm text-destructive mt-1">{errors.email}</p>
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.email}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="message" className="text-card-foreground">Message</Label>
+                  <Label htmlFor="message" className="text-card-foreground">
+                    Message <span className="text-destructive">*</span>
+                  </Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -116,11 +141,18 @@ const Contact = () => {
                     placeholder="Tell us about your project..."
                   />
                   {errors.message && (
-                    <p className="text-sm text-destructive mt-1">{errors.message}</p>
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.message}
+                    </p>
                   )}
                 </div>
 
-                <Button type="submit" variant="hero" size="lg" className="w-full">
+                <Button
+                  type="submit"
+                  variant="hero"
+                  size="lg"
+                  className="w-full"
+                >
                   Send Message
                   <Send className="ml-2 h-5 w-5" />
                 </Button>
