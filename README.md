@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# SecurePrimeDex Digital Agency
 
-## Project info
+## About Us
 
-**URL**: https://lovable.dev/projects/2387f794-6334-4270-9e6d-87a996a8ad49
+SecurePrimeDex is a cutting-edge digital agency specializing in creating innovative web solutions for businesses of all sizes. We combine creativity, technology, and strategic thinking to deliver exceptional digital experiences that drive growth and engagement.
 
-## How can I edit this code?
+## Our Services
 
-There are several ways of editing your application.
+- **Web Development**: Custom websites and web applications built with modern technologies
+- **UI/UX Design**: User-centered design solutions that enhance user experience
+- **Digital Strategy**: Comprehensive digital transformation strategies
+- **Consultation**: Expert advice on digital presence and technology implementation
 
-**Use Lovable**
+## Project Overview
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2387f794-6334-4270-9e6d-87a996a8ad49) and start prompting.
+This project represents our agency's official website, showcasing our capabilities, services, and portfolio. Built with performance, accessibility, and user experience in mind.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Technology Stack
 
-**Use your preferred IDE**
+Our website is built using industry-leading technologies:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend Framework**: React with TypeScript for type-safe development
+- **Build Tool**: Vite for fast development and optimized builds
+- **Styling**: Tailwind CSS for utility-first styling
+- **UI Components**: shadcn/ui for beautiful, accessible components
+- **Development Tools**: ESLint for code quality and consistency
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Getting Started
 
-Follow these steps:
+To set up the project locally, follow these steps:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Prerequisites
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Node.js (v16 or higher)
+- npm or yarn package manager
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Installation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/secureprimedex-digital-agency.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd secureprimedex-digital-agency
+   ```
+
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser and visit `http://localhost:5173` to view the application.
+
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run preview` - Preview the production build locally
+- `npm run lint` - Run ESLint to check for code issues
+
+## Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── pages/         # Page components
+├── assets/        # Static assets like images
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions
+├── App.tsx        # Main App component
+└── main.tsx       # Application entry point
 ```
 
-**Edit a file directly in GitHub**
+## Contributing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+We welcome contributions to improve our website! Please follow these steps:
 
-**Use GitHub Codespaces**
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Deployment
 
-## What technologies are used for this project?
+The website is automatically deployed through GitHub Actions. Any changes pushed to the main branch will be automatically deployed to our production environment.
 
-This project is built with:
+## License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## How can I deploy this project?
+## Contact
 
-Simply open [Lovable](https://lovable.dev/projects/2387f794-6334-4270-9e6d-87a996a8ad49) and click on Share -> Publish.
+For any inquiries or collaboration opportunities, please reach out to us:
 
-## Can I connect a custom domain to my Lovable project?
+- Email: info@secureprimedex.com
+- Website: www.secureprimedex.com
+- Phone: +1 (555) 123-4567
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+© 2023 SecurePrimeDex Digital Agency. All rights reserved.
