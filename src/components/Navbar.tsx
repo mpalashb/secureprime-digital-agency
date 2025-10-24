@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="#" className="text-2xl font-bold text-primary">
+            <a href="/" className="text-2xl font-bold text-primary">
               SecurePrime<span className="text-accent">Dex</span>
             </a>
           </div>
