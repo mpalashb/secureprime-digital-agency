@@ -5,23 +5,26 @@ const services = [
   {
     icon: Code,
     title: "Web Development & Design",
-    description: "Fast, secure, and responsive websites built with the latest technologies.",
+    description:
+      "Fast, secure, and responsive websites built with the latest technologies.",
   },
   {
     icon: Cpu,
     title: "Automation & AI Integration",
-    description: "Streamline your business with smart workflows and AI-driven systems.",
+    description:
+      "Streamline your business with smart workflows and AI-driven systems.",
   },
   {
     icon: TrendingUp,
     title: "Digital Marketing & SEO",
-    description: "Grow your visibility and attract more customers with data-backed strategies.",
+    description:
+      "Grow your visibility and attract more customers with data-backed strategies.",
   },
 ];
 
 const Services = () => {
   return (
-    <section className="py-24 bg-background">
+    <section id="services" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -34,8 +37,8 @@ const Services = () => {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {services.map((service, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="shadow-card hover:shadow-glow transition-smooth border-border bg-card group"
             >
               <CardContent className="pt-8 pb-6 px-6 text-center">

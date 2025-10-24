@@ -37,15 +37,29 @@ All colors MUST be HSL.
     --ring: 218 100% 50%;
 
     --radius: 0.75rem;
-    
+
     /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(218 100% 50%), hsl(191 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(218 100% 12%), hsl(218 100% 25%));
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(218 100% 50%),
+      hsl(191 100% 50%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(218 100% 12%),
+      hsl(218 100% 25%)
+    );
+    --gradient-stats: linear-gradient(
+      135deg,
+      hsl(280 100% 60%),
+      hsl(220 100% 50%),
+      hsl(191 100% 50%)
+    );
+
     /* Custom shadows */
     --shadow-glow: 0 0 40px hsl(191 100% 50% / 0.3);
     --shadow-card: 0 4px 20px hsl(218 100% 15% / 0.08);
-    
+
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -104,11 +118,16 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Poppins", sans-serif;
   }
 }
 
@@ -116,19 +135,23 @@ All colors MUST be HSL.
   .gradient-primary {
     background: var(--gradient-primary);
   }
-  
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
-  
+
+  .gradient-stats {
+    background: var(--gradient-stats);
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-  
+
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
-  
+
   .transition-smooth {
     transition: var(--transition-smooth);
   }
