@@ -13,25 +13,17 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import {
-  ArrowRight,
-  CheckCircle,
-  Clock,
-  Users,
-  Zap,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Clock, Users, Zap } from "lucide-react";
 import { z } from "zod";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
 
-const inquirySchema = z.object({
-  name: z
+const getStartedSchema = z.object({
+  full_name: z
     .string()
     .trim()
-    .min(1, "Name is required")
+    .min(1, "Contact person name is required")
     .max(100, "Name must be less than 100 characters"),
   email: z
     .string()
@@ -49,44 +41,39 @@ const inquirySchema = z.object({
     .min(1, "Phone number is required")
     .max(20, "Phone number must be less than 20 characters"),
   service: z.string().trim().min(1, "Please select a service"),
-  projectDescription: z
+  project_description: z
     .string()
     .trim()
     .min(10, "Project description must be at least 10 characters")
     .max(2000, "Project description must be less than 2000 characters"),
-  budget: z.string().trim().min(1, "Please select a budget range"),
-  timeline: z.string().trim().min(1, "Please select a timeline"),
-  contactMethod: z
-    .string()
-    .trim()
-    .min(1, "Please select a preferred contact method"),
+  project_budget: z.string().trim().min(1, "Please select a budget range"),
+  project_timeline: z.string().trim().min(1, "Please select a timeline"),
   termsAccepted: z
     .boolean()
     .refine((val) => val === true, "You must accept the terms and conditions"),
 });
 
-const InquiryForm = () => {
+const GetStarted = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     company: "",
     phone: "",
     service: "",
-    projectDescription: "",
-    budget: "",
-    timeline: "",
-    contactMethod: "",
+    project_description: "",
+    project_budget: "",
+    project_timeline: "",
     termsAccepted: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const result = inquirySchema.safeParse(formData);
+    const result = getStartedSchema.safeParse(formData);
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -102,28 +89,59 @@ const InquiryForm = () => {
 
     setErrors({});
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke(
+        "submit-consultation",
+        {
+          body: {
+            full_name: formData.full_name,
+            email: formData.email,
+            company: formData.company,
+            phone: formData.phone,
+            service: formData.service,
+            consultation_type: "inquiry",
+            project_description: formData.project_description,
+            project_budget: formData.project_budget,
+            project_timeline: formData.project_timeline,
+            form_type: "inquiry",
+          },
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
       toast({
-        title: "Inquiry Submitted Successfully!",
+        title: "Project Submitted Successfully!",
         description:
-          "Thank you for your inquiry. Our team will get back to you within 24 hours to discuss your project requirements.",
+          "Thank you for starting your journey with us. Our team will contact you within 24 hours to discuss the next steps.",
       });
 
       setFormData({
-        name: "",
+        full_name: "",
         email: "",
         company: "",
         phone: "",
         service: "",
-        projectDescription: "",
-        budget: "",
-        timeline: "",
-        contactMethod: "",
+        project_description: "",
+        project_budget: "",
+        project_timeline: "",
         termsAccepted: false,
       });
+    } catch (error: any) {
+      console.error("Error submitting project inquiry:", error);
+      toast({
+        title: "Error",
+        description:
+          error.message ||
+          "Failed to submit project inquiry. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const handleChange = (
@@ -159,78 +177,31 @@ const InquiryForm = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-              Project Inquiry Form
+              Start Your Digital Transformation
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Have a project in mind? Fill out the form below and our team will
-              get in touch within 24 hours to discuss how we can bring your
-              vision to life.
+              Ready to elevate your business? Fill out the form below and our
+              team will get in touch within 24 hours.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Contact Info Section */}
+      {/* Process Steps */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">
-              Get In Touch
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="border-border bg-card">
-                <CardContent className="pt-6">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Email Us</h3>
-                  <p className="text-muted-foreground">
-                    info@secureprimedex.com
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border bg-card">
-                <CardContent className="pt-6">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <Phone className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Call Us</h3>
-                  <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border bg-card">
-                <CardContent className="pt-6">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <MapPin className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
-                  <p className="text-muted-foreground">
-                    123 Digital Avenue, Tech City
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Process Steps */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              How We Work
+              How It Works
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">1. Discovery</h3>
+                <h3 className="text-xl font-semibold mb-2">1. Consultation</h3>
                 <p className="text-muted-foreground">
-                  We learn about your business and goals
+                  We discuss your needs and goals
                 </p>
               </div>
               <div className="text-center">
@@ -239,25 +210,25 @@ const InquiryForm = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">2. Strategy</h3>
                 <p className="text-muted-foreground">
-                  We develop a customized plan
+                  We create a customized plan
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Clock className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">3. Execution</h3>
-                <p className="text-muted-foreground">
-                  We implement the solution
-                </p>
+                <h3 className="text-xl font-semibold mb-2">
+                  3. Implementation
+                </h3>
+                <p className="text-muted-foreground">We execute the strategy</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">4. Delivery</h3>
+                <h3 className="text-xl font-semibold mb-2">4. Results</h3>
                 <p className="text-muted-foreground">
-                  We deliver and support the project
+                  We deliver measurable outcomes
                 </p>
               </div>
             </div>
@@ -266,16 +237,14 @@ const InquiryForm = () => {
       </section>
 
       {/* Form Section */}
-      <section className="py-16 bg-background">
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <Card className="shadow-card border-border bg-card">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-3xl">
-                  Tell Us About Your Project
-                </CardTitle>
+                <CardTitle className="text-3xl">Project Inquiry Form</CardTitle>
                 <p className="text-muted-foreground">
-                  Fill out the form below and we'll get back to you within 24
+                  Tell us about your project and we'll get back to you within 24
                   hours
                 </p>
               </CardHeader>
@@ -283,50 +252,8 @@ const InquiryForm = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="name" className="text-card-foreground">
-                        Full Name *
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        type="text"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="mt-2"
-                        placeholder="Your full name"
-                      />
-                      {errors.name && (
-                        <p className="text-sm text-destructive mt-1">
-                          {errors.name}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="email" className="text-card-foreground">
-                        Email Address *
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="mt-2"
-                        placeholder="your.email@example.com"
-                      />
-                      {errors.email && (
-                        <p className="text-sm text-destructive mt-1">
-                          {errors.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
                       <Label htmlFor="company" className="text-card-foreground">
-                        Company Name *
+                        Company Name <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         id="company"
@@ -345,8 +272,55 @@ const InquiryForm = () => {
                     </div>
 
                     <div>
+                      <Label
+                        htmlFor="full_name"
+                        className="text-card-foreground"
+                      >
+                        Contact Person{" "}
+                        <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="full_name"
+                        name="full_name"
+                        type="text"
+                        value={formData.full_name}
+                        onChange={handleChange}
+                        className="mt-2"
+                        placeholder="Your full name"
+                      />
+                      {errors.full_name && (
+                        <p className="text-sm text-destructive mt-1">
+                          {errors.full_name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="email" className="text-card-foreground">
+                        Email Address{" "}
+                        <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="mt-2"
+                        placeholder="your.email@example.com"
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive mt-1">
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
                       <Label htmlFor="phone" className="text-card-foreground">
-                        Phone Number *
+                        Phone Number <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         id="phone"
@@ -367,7 +341,8 @@ const InquiryForm = () => {
 
                   <div>
                     <Label htmlFor="service" className="text-card-foreground">
-                      Service Interest *
+                      Service Interest{" "}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <Select
                       value={formData.service}
@@ -410,35 +385,40 @@ const InquiryForm = () => {
 
                   <div>
                     <Label
-                      htmlFor="projectDescription"
+                      htmlFor="project_description"
                       className="text-card-foreground"
                     >
-                      Project Description *
+                      Project Description{" "}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
-                      id="projectDescription"
-                      name="projectDescription"
-                      value={formData.projectDescription}
+                      id="project_description"
+                      name="project_description"
+                      value={formData.project_description}
                       onChange={handleChange}
                       className="mt-2 min-h-[150px]"
                       placeholder="Tell us about your project, goals, and requirements..."
                     />
-                    {errors.projectDescription && (
+                    {errors.project_description && (
                       <p className="text-sm text-destructive mt-1">
-                        {errors.projectDescription}
+                        {errors.project_description}
                       </p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="budget" className="text-card-foreground">
-                        Project Budget *
+                      <Label
+                        htmlFor="project_budget"
+                        className="text-card-foreground"
+                      >
+                        Project Budget{" "}
+                        <span className="text-destructive">*</span>
                       </Label>
                       <Select
-                        value={formData.budget}
+                        value={formData.project_budget}
                         onValueChange={(value) =>
-                          handleSelectChange("budget", value)
+                          handleSelectChange("project_budget", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -463,24 +443,25 @@ const InquiryForm = () => {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.budget && (
+                      {errors.project_budget && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.budget}
+                          {errors.project_budget}
                         </p>
                       )}
                     </div>
 
                     <div>
                       <Label
-                        htmlFor="timeline"
+                        htmlFor="project_timeline"
                         className="text-card-foreground"
                       >
-                        Project Timeline *
+                        Project Timeline{" "}
+                        <span className="text-destructive">*</span>
                       </Label>
                       <Select
-                        value={formData.timeline}
+                        value={formData.project_timeline}
                         onValueChange={(value) =>
-                          handleSelectChange("timeline", value)
+                          handleSelectChange("project_timeline", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -496,44 +477,12 @@ const InquiryForm = () => {
                           <SelectItem value="flexible">Flexible</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.timeline && (
+                      {errors.project_timeline && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.timeline}
+                          {errors.project_timeline}
                         </p>
                       )}
                     </div>
-                  </div>
-
-                  <div>
-                    <Label
-                      htmlFor="contactMethod"
-                      className="text-card-foreground"
-                    >
-                      Preferred Contact Method *
-                    </Label>
-                    <Select
-                      value={formData.contactMethod}
-                      onValueChange={(value) =>
-                        handleSelectChange("contactMethod", value)
-                      }
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select contact method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="phone">Phone Call</SelectItem>
-                        <SelectItem value="video">Video Call</SelectItem>
-                        <SelectItem value="in-person">
-                          In-Person Meeting
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.contactMethod && (
-                      <p className="text-sm text-destructive mt-1">
-                        {errors.contactMethod}
-                      </p>
-                    )}
                   </div>
 
                   <div className="flex items-start space-x-2">
@@ -552,7 +501,8 @@ const InquiryForm = () => {
                         htmlFor="termsAccepted"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        I accept the terms and conditions *
+                        I accept the terms and conditions{" "}
+                        <span className="text-destructive">*</span>
                       </Label>
                       <p className="text-sm text-muted-foreground">
                         By submitting this form, you agree to our{" "}
@@ -586,7 +536,7 @@ const InquiryForm = () => {
                     className="w-full"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Submitting..." : "Submit Inquiry"}
+                    {isSubmitting ? "Submitting..." : "Submit Project Inquiry"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </form>
@@ -601,4 +551,4 @@ const InquiryForm = () => {
   );
 };
 
-export default InquiryForm;
+export default GetStarted;

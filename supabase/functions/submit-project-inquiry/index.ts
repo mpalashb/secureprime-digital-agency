@@ -7,11 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-interface ContactRequest {
-  name: string;
+interface ProjectInquiryRequest {
+  full_name: string;
   email: string;
-  message: string;
-  form_type?: string;
+  company?: string;
+  phone: string;
+  service: string;
+  project_description: string;
+  project_budget?: string;
+  project_timeline?: string;
+  contact_method?: string;
+  additional_information?: string;
 }
 
 serve(async (req) => {
@@ -33,15 +39,28 @@ serve(async (req) => {
     }
 
     // Parse the request body
-    const { name, email, message, form_type }: ContactRequest = await req.json()
+    const {
+      full_name,
+      email,
+      company,
+      phone,
+      service,
+      project_description,
+      project_budget,
+      project_timeline,
+      contact_method,
+      additional_information
+    }: ProjectInquiryRequest = await req.json()
 
-    // Validate input
-    if (!name || !email || !message) {
+    // Validate required fields
+    if (!full_name || !email || !phone || !service || !project_description) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: name, email, message" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        JSON.stringify({
+          error: "Missing required fields: full_name, email, phone, service, project_description"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       )
     }
@@ -63,16 +82,29 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Insert the contact data into the database
+    // Insert the project inquiry data into the consultations table
     const { data, error } = await supabase
-      .from("contacts")
-      .insert({ name, email, message, form_type })
+      .from("consultations")
+      .insert({
+        full_name,
+        email,
+        company,
+        phone,
+        service,
+        consultation_type: "project_inquiry",
+        project_description,
+        project_budget: project_budget || null,
+        project_timeline: project_timeline || null,
+        contact_method: contact_method || null,
+        additional_information: additional_information || null,
+        form_type: "inquiry"
+      })
       .select()
 
     if (error) {
-      console.error("Error inserting contact data:", error)
+      console.error("Error inserting project inquiry data:", error)
       return new Response(
-        JSON.stringify({ error: "Failed to submit contact form" }),
+        JSON.stringify({ error: "Failed to submit project inquiry" }),
         { 
           status: 500, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -96,17 +128,25 @@ serve(async (req) => {
       const { data: emailData, error: emailError } = await resend.emails.send({
         from: fromEmail,
         to: [email],
-        subject: "Thank you for contacting SecurePrimedex",
+        subject: "Thank you for your project inquiry with SecurePrimedex",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-            <h2 style="color: #333;">Thank You for Contacting SecurePrimedex</h2>
-            <p style="color: #555; line-height: 1.6;">Hello ${name},</p>
-            <p style="color: #555; line-height: 1.6;">We have received your message and appreciate you reaching out to us. Our team will review your inquiry and get back to you as soon as possible.</p>
-            <p style="color: #555; line-height: 1.6;">Here's a copy of your message:</p>
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <p style="color: #333; margin: 0;">${message}</p>
-            </div>
-            <p style="color: #555; line-height: 1.6;">If you have any further questions, please don't hesitate to contact us again.</p>
+            <h2 style="color: #333;">Thank You for Your Project Inquiry</h2>
+            <p style="color: #555; line-height: 1.6;">Hello ${full_name},</p>
+            <p style="color: #555; line-height: 1.6;">We have received your project inquiry and appreciate your interest in SecurePrimedex. Our team will review your project details and get back to you within 24 hours to discuss how we can help bring your vision to life.</p>
+            
+            <h3 style="color: #333; margin-top: 25px;">Project Inquiry Details:</h3>
+            <ul style="color: #555; line-height: 1.6;">
+              <li><strong>Service:</strong> ${service}</li>
+              <li><strong>Project Description:</strong> ${project_description}</li>
+              ${company ? `<li><strong>Company:</strong> ${company}</li>` : ''}
+              ${project_budget ? `<li><strong>Project Budget:</strong> ${project_budget}</li>` : ''}
+              ${project_timeline ? `<li><strong>Project Timeline:</strong> ${project_timeline}</li>` : ''}
+              ${contact_method ? `<li><strong>Preferred Contact Method:</strong> ${contact_method}</li>` : ''}
+              ${additional_information ? `<li><strong>Additional Information:</strong> ${additional_information}</li>` : ''}
+            </ul>
+            
+            <p style="color: #555; line-height: 1.6;">We're excited about the possibility of working together and will be in touch soon to discuss the next steps.</p>
             <p style="color: #555; line-height: 1.6;">Best regards,<br>The SecurePrimedex Team</p>
           </div>
         `,
@@ -126,7 +166,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Contact form submitted successfully",
+        message: "Project inquiry submitted successfully",
         data
       }),
       {

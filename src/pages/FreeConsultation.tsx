@@ -17,9 +17,10 @@ import { Calendar, Clock, Users, CheckCircle, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
 
 const consultationSchema = z.object({
-  name: z
+  full_name: z
     .string()
     .trim()
     .min(1, "Name is required")
@@ -32,25 +33,55 @@ const consultationSchema = z.object({
   company: z
     .string()
     .trim()
-    .min(1, "Company name is required")
-    .max(100, "Company name must be less than 100 characters"),
+    .max(100, "Company name must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
   phone: z
     .string()
     .trim()
     .min(1, "Phone number is required")
     .max(20, "Phone number must be less than 20 characters"),
   service: z.string().trim().min(1, "Please select a service interest"),
-  consultationType: z
+  consultation_type: z
     .string()
     .trim()
     .min(1, "Please select a consultation type"),
-  preferredDate: z.string().trim().min(1, "Please select a preferred date"),
-  preferredTime: z.string().trim().min(1, "Please select a preferred time"),
-  message: z
+  preferred_date: z
+    .string()
+    .trim()
+    .max(50, "Date must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+  preferred_time: z
+    .string()
+    .trim()
+    .max(50, "Time must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+  project_description: z
+    .string()
+    .trim()
+    .max(500, "Project description must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  project_budget: z
+    .string()
+    .trim()
+    .max(100, "Budget must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  project_timeline: z
+    .string()
+    .trim()
+    .max(100, "Timeline must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  additional_information: z
     .string()
     .trim()
     .max(500, "Message must be less than 500 characters")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   termsAccepted: z
     .boolean()
     .refine((val) => val === true, "You must accept the terms and conditions"),
@@ -59,21 +90,24 @@ const consultationSchema = z.object({
 const FreeConsultation = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     company: "",
     phone: "",
     service: "",
-    consultationType: "",
-    preferredDate: "",
-    preferredTime: "",
-    message: "",
+    consultation_type: "",
+    preferred_date: "",
+    preferred_time: "",
+    project_description: "",
+    project_budget: "",
+    project_timeline: "",
+    additional_information: "",
     termsAccepted: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -93,8 +127,34 @@ const FreeConsultation = () => {
 
     setErrors({});
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke(
+        "submit-consultation",
+        {
+          body: {
+            full_name: formData.full_name,
+            email: formData.email,
+            company: formData.company || null,
+            phone: formData.phone,
+            service: formData.service,
+            consultation_type: formData.consultation_type,
+            preferred_date: formData.preferred_date || null,
+            preferred_time: formData.preferred_time || null,
+            project_description: formData.project_description || null,
+            project_budget: formData.project_budget || null,
+            project_timeline: formData.project_timeline || null,
+            additional_information: formData.additional_information || null,
+            form_type: "consultation",
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw error;
+      }
+
       toast({
         title: "Consultation Booked Successfully!",
         description:
@@ -102,19 +162,32 @@ const FreeConsultation = () => {
       });
 
       setFormData({
-        name: "",
+        full_name: "",
         email: "",
         company: "",
         phone: "",
         service: "",
-        consultationType: "",
-        preferredDate: "",
-        preferredTime: "",
-        message: "",
+        consultation_type: "",
+        preferred_date: "",
+        preferred_time: "",
+        project_description: "",
+        project_budget: "",
+        project_timeline: "",
+        additional_information: "",
         termsAccepted: false,
       });
+    } catch (error: any) {
+      console.error("Error submitting consultation:", error);
+      toast({
+        title: "Submission Error",
+        description:
+          error.message ||
+          "Failed to submit consultation request. Please check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const handleChange = (
@@ -280,17 +353,17 @@ const FreeConsultation = () => {
                         Full Name <span className="text-destructive">*</span>
                       </Label>
                       <Input
-                        id="name"
-                        name="name"
+                        id="full_name"
+                        name="full_name"
                         type="text"
-                        value={formData.name}
+                        value={formData.full_name}
                         onChange={handleChange}
                         className="mt-2"
                         placeholder="Your full name"
                       />
-                      {errors.name && (
+                      {errors.full_name && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.name}
+                          {errors.full_name}
                         </p>
                       )}
                     </div>
@@ -320,7 +393,7 @@ const FreeConsultation = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="company" className="text-card-foreground">
-                        Company Name <span className="text-destructive">*</span>
+                        Company Name
                       </Label>
                       <Input
                         id="company"
@@ -329,7 +402,7 @@ const FreeConsultation = () => {
                         value={formData.company}
                         onChange={handleChange}
                         className="mt-2"
-                        placeholder="Your company name"
+                        placeholder="Your company name (optional)"
                       />
                       {errors.company && (
                         <p className="text-sm text-destructive mt-1">
@@ -413,9 +486,9 @@ const FreeConsultation = () => {
                         <span className="text-destructive">*</span>
                       </Label>
                       <Select
-                        value={formData.consultationType}
+                        value={formData.consultation_type}
                         onValueChange={(value) =>
-                          handleSelectChange("consultationType", value)
+                          handleSelectChange("consultation_type", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -429,9 +502,9 @@ const FreeConsultation = () => {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.consultationType && (
+                      {errors.consultation_type && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.consultationType}
+                          {errors.consultation_type}
                         </p>
                       )}
                     </div>
@@ -443,20 +516,19 @@ const FreeConsultation = () => {
                         htmlFor="preferredDate"
                         className="text-card-foreground"
                       >
-                        Preferred Date{" "}
-                        <span className="text-destructive">*</span>
+                        Preferred Date (Optional)
                       </Label>
                       <Input
-                        id="preferredDate"
-                        name="preferredDate"
+                        id="preferred_date"
+                        name="preferred_date"
                         type="date"
-                        value={formData.preferredDate}
+                        value={formData.preferred_date}
                         onChange={handleChange}
                         className="mt-2"
                       />
-                      {errors.preferredDate && (
+                      {errors.preferred_date && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.preferredDate}
+                          {errors.preferred_date}
                         </p>
                       )}
                     </div>
@@ -466,13 +538,12 @@ const FreeConsultation = () => {
                         htmlFor="preferredTime"
                         className="text-card-foreground"
                       >
-                        Preferred Time{" "}
-                        <span className="text-destructive">*</span>
+                        Preferred Time (Optional)
                       </Label>
                       <Select
-                        value={formData.preferredTime}
+                        value={formData.preferred_time}
                         onValueChange={(value) =>
-                          handleSelectChange("preferredTime", value)
+                          handleSelectChange("preferred_time", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -489,29 +560,102 @@ const FreeConsultation = () => {
                           <SelectItem value="5pm">5:00 PM</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.preferredTime && (
+                      {errors.preferred_time && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.preferredTime}
+                          {errors.preferred_time}
                         </p>
                       )}
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="message" className="text-card-foreground">
+                    <Label
+                      htmlFor="project_description"
+                      className="text-card-foreground"
+                    >
+                      Project Description (Optional)
+                    </Label>
+                    <Textarea
+                      id="project_description"
+                      name="project_description"
+                      value={formData.project_description}
+                      onChange={handleChange}
+                      className="mt-2 min-h-[100px]"
+                      placeholder="Tell us about your project..."
+                    />
+                    {errors.project_description && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.project_description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label
+                        htmlFor="project_budget"
+                        className="text-card-foreground"
+                      >
+                        Project Budget (Optional)
+                      </Label>
+                      <Input
+                        id="project_budget"
+                        name="project_budget"
+                        type="text"
+                        value={formData.project_budget}
+                        onChange={handleChange}
+                        className="mt-2"
+                        placeholder="e.g., $5,000 - $10,000"
+                      />
+                      {errors.project_budget && (
+                        <p className="text-sm text-destructive mt-1">
+                          {errors.project_budget}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="project_timeline"
+                        className="text-card-foreground"
+                      >
+                        Project Timeline (Optional)
+                      </Label>
+                      <Input
+                        id="project_timeline"
+                        name="project_timeline"
+                        type="text"
+                        value={formData.project_timeline}
+                        onChange={handleChange}
+                        className="mt-2"
+                        placeholder="e.g., 2-3 months"
+                      />
+                      {errors.project_timeline && (
+                        <p className="text-sm text-destructive mt-1">
+                          {errors.project_timeline}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor="additional_information"
+                      className="text-card-foreground"
+                    >
                       Additional Information (Optional)
                     </Label>
                     <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
+                      id="additional_information"
+                      name="additional_information"
+                      value={formData.additional_information}
                       onChange={handleChange}
                       className="mt-2 min-h-[100px]"
-                      placeholder="Tell us a bit about your project or any specific questions you have..."
+                      placeholder="Any specific questions or additional information..."
                     />
-                    {errors.message && (
+                    {errors.additional_information && (
                       <p className="text-sm text-destructive mt-1">
-                        {errors.message}
+                        {errors.additional_information}
                       </p>
                     )}
                   </div>

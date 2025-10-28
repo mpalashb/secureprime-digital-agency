@@ -17,14 +17,10 @@ import { ArrowRight, CheckCircle, Clock, Users, Zap } from "lucide-react";
 import { z } from "zod";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
 
 const getStartedSchema = z.object({
-  companyName: z
-    .string()
-    .trim()
-    .min(1, "Company name is required")
-    .max(100, "Company name must be less than 100 characters"),
-  contactPerson: z
+  full_name: z
     .string()
     .trim()
     .min(1, "Contact person name is required")
@@ -34,19 +30,24 @@ const getStartedSchema = z.object({
     .trim()
     .email("Invalid email address")
     .max(255, "Email must be less than 255 characters"),
+  company: z
+    .string()
+    .trim()
+    .min(1, "Company name is required")
+    .max(100, "Company name must be less than 100 characters"),
   phone: z
     .string()
     .trim()
     .min(1, "Phone number is required")
     .max(20, "Phone number must be less than 20 characters"),
   service: z.string().trim().min(1, "Please select a service"),
-  projectDescription: z
+  project_description: z
     .string()
     .trim()
     .min(10, "Project description must be at least 10 characters")
     .max(2000, "Project description must be less than 2000 characters"),
-  budget: z.string().trim().min(1, "Please select a budget range"),
-  timeline: z.string().trim().min(1, "Please select a timeline"),
+  project_budget: z.string().trim().min(1, "Please select a budget range"),
+  project_timeline: z.string().trim().min(1, "Please select a timeline"),
   termsAccepted: z
     .boolean()
     .refine((val) => val === true, "You must accept the terms and conditions"),
@@ -55,20 +56,20 @@ const getStartedSchema = z.object({
 const GetStarted = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    companyName: "",
-    contactPerson: "",
+    full_name: "",
     email: "",
+    company: "",
     phone: "",
     service: "",
-    projectDescription: "",
-    budget: "",
-    timeline: "",
+    project_description: "",
+    project_budget: "",
+    project_timeline: "",
     termsAccepted: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -88,8 +89,30 @@ const GetStarted = () => {
 
     setErrors({});
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke(
+        "submit-consultation",
+        {
+          body: {
+            full_name: formData.full_name,
+            email: formData.email,
+            company: formData.company,
+            phone: formData.phone,
+            service: formData.service,
+            consultation_type: "inquiry",
+            project_description: formData.project_description,
+            project_budget: formData.project_budget,
+            project_timeline: formData.project_timeline,
+            form_type: "inquiry",
+          },
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Project Submitted Successfully!",
         description:
@@ -97,18 +120,28 @@ const GetStarted = () => {
       });
 
       setFormData({
-        companyName: "",
-        contactPerson: "",
+        full_name: "",
         email: "",
+        company: "",
         phone: "",
         service: "",
-        projectDescription: "",
-        budget: "",
-        timeline: "",
+        project_description: "",
+        project_budget: "",
+        project_timeline: "",
         termsAccepted: false,
       });
+    } catch (error: any) {
+      console.error("Error submitting project inquiry:", error);
+      toast({
+        title: "Error",
+        description:
+          error.message ||
+          "Failed to submit project inquiry. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const handleChange = (
@@ -219,48 +252,45 @@ const GetStarted = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label
-                        htmlFor="companyName"
-                        className="text-card-foreground"
-                      >
+                      <Label htmlFor="company" className="text-card-foreground">
                         Company Name <span className="text-destructive">*</span>
                       </Label>
                       <Input
-                        id="companyName"
-                        name="companyName"
+                        id="company"
+                        name="company"
                         type="text"
-                        value={formData.companyName}
+                        value={formData.company}
                         onChange={handleChange}
                         className="mt-2"
                         placeholder="Your company name"
                       />
-                      {errors.companyName && (
+                      {errors.company && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.companyName}
+                          {errors.company}
                         </p>
                       )}
                     </div>
 
                     <div>
                       <Label
-                        htmlFor="contactPerson"
+                        htmlFor="full_name"
                         className="text-card-foreground"
                       >
                         Contact Person{" "}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
-                        id="contactPerson"
-                        name="contactPerson"
+                        id="full_name"
+                        name="full_name"
                         type="text"
-                        value={formData.contactPerson}
+                        value={formData.full_name}
                         onChange={handleChange}
                         className="mt-2"
                         placeholder="Your full name"
                       />
-                      {errors.contactPerson && (
+                      {errors.full_name && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.contactPerson}
+                          {errors.full_name}
                         </p>
                       )}
                     </div>
@@ -355,37 +385,40 @@ const GetStarted = () => {
 
                   <div>
                     <Label
-                      htmlFor="projectDescription"
+                      htmlFor="project_description"
                       className="text-card-foreground"
                     >
                       Project Description{" "}
                       <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
-                      id="projectDescription"
-                      name="projectDescription"
-                      value={formData.projectDescription}
+                      id="project_description"
+                      name="project_description"
+                      value={formData.project_description}
                       onChange={handleChange}
                       className="mt-2 min-h-[150px]"
                       placeholder="Tell us about your project, goals, and requirements..."
                     />
-                    {errors.projectDescription && (
+                    {errors.project_description && (
                       <p className="text-sm text-destructive mt-1">
-                        {errors.projectDescription}
+                        {errors.project_description}
                       </p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="budget" className="text-card-foreground">
+                      <Label
+                        htmlFor="project_budget"
+                        className="text-card-foreground"
+                      >
                         Project Budget{" "}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Select
-                        value={formData.budget}
+                        value={formData.project_budget}
                         onValueChange={(value) =>
-                          handleSelectChange("budget", value)
+                          handleSelectChange("project_budget", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -410,25 +443,25 @@ const GetStarted = () => {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.budget && (
+                      {errors.project_budget && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.budget}
+                          {errors.project_budget}
                         </p>
                       )}
                     </div>
 
                     <div>
                       <Label
-                        htmlFor="timeline"
+                        htmlFor="project_timeline"
                         className="text-card-foreground"
                       >
                         Project Timeline{" "}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Select
-                        value={formData.timeline}
+                        value={formData.project_timeline}
                         onValueChange={(value) =>
-                          handleSelectChange("timeline", value)
+                          handleSelectChange("project_timeline", value)
                         }
                       >
                         <SelectTrigger className="mt-2">
@@ -444,9 +477,9 @@ const GetStarted = () => {
                           <SelectItem value="flexible">Flexible</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.timeline && (
+                      {errors.project_timeline && (
                         <p className="text-sm text-destructive mt-1">
-                          {errors.timeline}
+                          {errors.project_timeline}
                         </p>
                       )}
                     </div>
