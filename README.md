@@ -15,6 +15,20 @@ SecurePrimeDex is a cutting-edge digital agency specializing in creating innovat
 
 This project represents our agency's official website, showcasing our capabilities, services, and portfolio. Built with performance, accessibility, and user experience in mind.
 
+## Screenshots
+
+### Home Page
+![Home Page](./project-screenshots/secureprimedex_home_Screenshot%202025-10-29%20152252.png)
+
+### Contact Form
+![Contact Form](./project-screenshots/secureprimedex_contact-form_Screenshot%202025-10-29%20152252.png)
+
+### Consultation Form
+![Consultation Form](./project-screenshots/secureprimedex_Consultation_Screenshot%202025-10-29%20152252.png)
+
+### Project Inquiry
+![Project Inquiry](./project-screenshots/secureprimedex_project_inquiry_Screenshot%202025-10-29%20152252.png)
+
 ## Technology Stack
 
 Our website is built using industry-leading technologies:
@@ -38,7 +52,7 @@ To set up the project locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/secureprimedex-digital-agency.git
+   git clone https://github.com/mpalashb/secureprime-digital-agency.git
    ```
 
 2. Navigate to the project directory:
@@ -92,17 +106,17 @@ We welcome contributions to improve our website! Please follow these steps:
 
 The website is automatically deployed through GitHub Actions. Any changes pushed to the main branch will be automatically deployed to our production environment.
 
+## Live Preview
+
+Visit our website at: [ecureprimedex.site](https://ecureprimedex.site) to check the live version.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## Repository
 
-For any inquiries or collaboration opportunities, please reach out to us:
-
-- Email: info@secureprimedex.com
-- Website: www.secureprimedex.com
-- Phone: +1 (555) 123-4567
+GitHub Repository: [https://github.com/mpalashb/secureprime-digital-agency.git](https://github.com/mpalashb/secureprime-digital-agency.git)
 
 ---
 
