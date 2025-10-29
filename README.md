@@ -108,7 +108,7 @@ The website is automatically deployed through GitHub Actions. Any changes pushed
 
 ## Live Preview
 
-Visit our website at: [ecureprimedex.site](https://ecureprimedex.site) to check the live version.
+Visit our website at: [secureprimedex.site](https://secureprimedex.site) to check the live version.
 
 ## License
 
